@@ -1,3 +1,4 @@
+
 import asyncio
 import os
 import re
@@ -8,8 +9,8 @@ from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from youtubesearchpython.__future__ import VideosSearch
 
-from AnnayanX.utils.database import is_on_off
-from AnnayanX.utils.formatters import time_to_seconds
+from AashikaMusic.utils.database import is_on_off
+from AashikaMusic.utils.formatters import time_to_seconds
 
 
 async def shell_cmd(cmd):
@@ -72,6 +73,8 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
+        if "?si=" in link:
+            link = link.split("?si=")[0]
         results = VideosSearch(link, limit=1)
         for result in (await results.next())["result"]:
             title = result["title"]
@@ -89,6 +92,8 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
+        if "?si=" in link:
+            link = link.split("?si=")[0]
         results = VideosSearch(link, limit=1)
         for result in (await results.next())["result"]:
             title = result["title"]
@@ -99,6 +104,8 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
+        if "?si=" in link:
+            link = link.split("?si=")[0]
         results = VideosSearch(link, limit=1)
         for result in (await results.next())["result"]:
             duration = result["duration"]
@@ -109,6 +116,8 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
+        if "?si=" in link:
+            link = link.split("?si=")[0]
         results = VideosSearch(link, limit=1)
         for result in (await results.next())["result"]:
             thumbnail = result["thumbnails"][0]["url"].split("?")[0]
@@ -119,8 +128,12 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
+        if "?si=" in link:
+            link = link.split("?si=")[0]
         proc = await asyncio.create_subprocess_exec(
             "yt-dlp",
+            "--cookies",
+            "cookies.txt",
             "-g",
             "-f",
             "best[height<=?720][width<=?1280]",
@@ -139,8 +152,10 @@ class YouTubeAPI:
             link = self.listbase + link
         if "&" in link:
             link = link.split("&")[0]
+        if "?si=" in link:
+            link = link.split("?si=")[0]
         playlist = await shell_cmd(
-            f"yt-dlp -i --get-id --flat-playlist --playlist-end {limit} --skip-download {link}"
+            f"yt-dlp -i --get-id --flat-playlist --playlist-end {limit} --skip-download --cookies cookies.txt {link}"
         )
         try:
             result = playlist.split("\n")
@@ -156,6 +171,8 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
+        if "?si=" in link:
+            link = link.split("?si=")[0]
         results = VideosSearch(link, limit=1)
         for result in (await results.next())["result"]:
             title = result["title"]
@@ -177,7 +194,12 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
-        ytdl_opts = {"quiet": True}
+        if "?si=" in link:
+            link = link.split("?si=")[0]
+        ytdl_opts = {
+            "quiet": True,
+            "cookiefile": "cookies.txt"
+        }
         ydl = yt_dlp.YoutubeDL(ytdl_opts)
         with ydl:
             formats_available = []
@@ -218,6 +240,8 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
+        if "?si=" in link:
+            link = link.split("?si=")[0]
         a = VideosSearch(link, limit=10)
         result = (await a.next()).get("result")
         title = result[query_type]["title"]
@@ -243,12 +267,13 @@ class YouTubeAPI:
 
         def audio_dl():
             ydl_optssx = {
-                "format": "bestaudio[ext=m4a]",
+                "format": "bestaudio/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
                 "geo_bypass": True,
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
+                "cookiefile": "cookies.txt",
             }
             x = yt_dlp.YoutubeDL(ydl_optssx)
             info = x.extract_info(link, False)
@@ -266,6 +291,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
+                "cookiefile": "cookies.txt",
             }
             x = yt_dlp.YoutubeDL(ydl_optssx)
             info = x.extract_info(link, False)
@@ -287,6 +313,7 @@ class YouTubeAPI:
                 "no_warnings": True,
                 "prefer_ffmpeg": True,
                 "merge_output_format": "mp4",
+                "cookiefile": "cookies.txt",
             }
             x = yt_dlp.YoutubeDL(ydl_optssx)
             x.download([link])
@@ -301,6 +328,7 @@ class YouTubeAPI:
                 "quiet": True,
                 "no_warnings": True,
                 "prefer_ffmpeg": True,
+                "cookiefile": "cookies.txt",
                 "postprocessors": [
                     {
                         "key": "FFmpegExtractAudio",
@@ -327,6 +355,8 @@ class YouTubeAPI:
             else:
                 proc = await asyncio.create_subprocess_exec(
                     "yt-dlp",
+                    "--cookies",
+                    "cookies.txt",
                     "-g",
                     "-f",
                     "best[height<=?720][width<=?1280]",
